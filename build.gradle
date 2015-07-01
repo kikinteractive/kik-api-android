@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.2'
+        classpath 'com.android.tools.build:gradle:1.2.3'
     }
 }
 
@@ -21,7 +21,6 @@ android {
     buildToolsVersion '20.0.0'
 
     defaultConfig {
-        applicationId "com.kik.kikapi"
         minSdkVersion 8
         targetSdkVersion 19
         versionCode 1
@@ -29,7 +28,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
