@@ -13,6 +13,7 @@ import org.apache.http.protocol.HTTP;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by costa on 2014-08-29.
@@ -44,6 +45,7 @@ public abstract class KikMessage
     protected String _imageUrl;
     protected String _previewUrl;
     protected String _iconUrl;
+    protected boolean _disallowSave = false;
 
     /**
      * Set whether the KikMessage is forwardable. Default value is true.
@@ -54,6 +56,17 @@ public abstract class KikMessage
     public KikMessage setForwardable(boolean isForwardable)
     {
         _forwardable = isForwardable;
+        return this;
+    }
+
+    /**
+     * Set whether the user should be disallowed from saving the content. Default value is false.
+     * @param disallowSave <code>true</code> to disable the ability to save the content
+     * @return the current instance of KikMessage with the disallowSave property set
+     */
+    public KikMessage setDisallowSave(boolean disallowSave)
+    {
+        _disallowSave = disallowSave;
         return this;
     }
 
@@ -109,6 +122,18 @@ public abstract class KikMessage
         builder.append(KIK_MESSENGER_API_SEND_URL);
         builder.append(getMessageType()).append("?");
 
+        List<NameValuePair> nameValuePairs = getNameValuePairs();
+
+        String httpParams = URLEncodedUtils.format(nameValuePairs, HTTP.UTF_8);
+        builder.append(httpParams);
+        return builder.toString();
+    }
+
+    /**
+     * Returns a list of all name-value pairs, used in link representation
+     */
+    protected List<NameValuePair> getNameValuePairs()
+    {
         ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         BasicNameValuePair appNamePair = new BasicNameValuePair("app_name", _appName);
         nameValuePairs.add(appNamePair);
@@ -124,7 +149,7 @@ public abstract class KikMessage
             nameValuePairs.add(textPair);
         }
 
-        BasicNameValuePair forwardablePair = new BasicNameValuePair("forwardable", _forwardable ? "1" : "0");
+        BasicNameValuePair forwardablePair = new BasicNameValuePair("forwardable", booleanToString(_forwardable));
         nameValuePairs.add(forwardablePair);
 
         for (String fallbackUrl : _Urls) {
@@ -151,12 +176,18 @@ public abstract class KikMessage
         BasicNameValuePair referrerPair = new BasicNameValuePair("referer", _appPkg);
         nameValuePairs.add(referrerPair);
 
-        String httpParams = URLEncodedUtils.format(nameValuePairs, HTTP.UTF_8);
-        builder.append(httpParams);
-        return builder.toString();
+        BasicNameValuePair disallowSavePair = new BasicNameValuePair("disallow_save", booleanToString(_disallowSave));
+        nameValuePairs.add(disallowSavePair);
+
+        return nameValuePairs;
     }
 
-    private boolean isValueSet(String value)
+    protected String booleanToString(boolean value)
+    {
+        return value ? "1" : "0";
+    }
+
+    protected boolean isValueSet(String value)
     {
         return value != null && !"".equals(value);
     }
